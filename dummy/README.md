@@ -1,3 +1,5 @@
-archivo de prueba
+# archivo de prueba
 
-mi perfil github: https://github.com/Rose-Aravena
+* [github:](https://github.com/Rose-Aravena)
+
+* [linkedin:](https://www.linkedin.com/in/rose-aravena/)
