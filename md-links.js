@@ -8,26 +8,66 @@ const cheerio = require('cheerio');
 // const files = fs.readdirSync('./') // Reads the contents of the directory. Returns: <string[]>
 // console.log(files)
 
-const filePath = './README.md'; // ruta relativa
-const fileName = path.basename(filePath) // nombre del archivo
-const absolutPath = path.join(__dirname, filePath) // ruta absoluta
+const filePath = './dummy/README.md'; // ruta relativa
 
-const readFile = (absolutPath) => {
-    const read = fs.readFileSync(absolutPath, 'utf8')
-    const fileHtml = marked.parse(read)
-    const $ = cheerio.load(fileHtml)
-    const getLinks = $('a') // indicamos lo que queremos extraer del html
+// const absolutPath = path.join(__dirname, filePath) // ruta absoluta
 
-    let arrayLinks = []
-    getLinks.each((i, links) => {
-        arrayLinks.push({
-            href: $(links).attr('href'),
-            text: $(links).text(),
-            file: fileName
+const readFile = (filePath) => {
+    const prom = new Promise((resolve) => {
+        const read = fs.readFileSync(filePath, 'utf8')
+        const fileHtml = marked.parse(read)
+        const $ = cheerio.load(fileHtml)
+        const getLinks = $('a') // indicamos lo que queremos extraer del html
+
+        let arrayLinks = []
+        getLinks.each((i, links) => {
+            arrayLinks.push({
+                href: $(links).attr('href'),
+                text: $(links).text(),
+                file: filePath
+            })
         })
+        resolve(arrayLinks)
     })
-    return arrayLinks
+    prom
+        .then()
 }
-// console.log(readFile(absolutPath));
-console.log(absolutPath)
-console.log(path.isAbsolute(absolutPath));
+console.log(readFile(filePath))
+
+const validate = (filePath) => {
+    const fileRead = readFile(filePath)
+    let fileArray = []
+
+    fileRead.map((links) => {
+        const href = links.href;
+        const text = links.text;
+        const file = links.file
+
+        const validateS = axios.get(href)
+            .then((response) => {
+                const resp = {
+                    href: href,
+                    text: text,
+                    file: file,
+                    status: response.status,
+                    statusText: response.statusText
+                };
+                return resp
+            })
+            .catch((error) => {
+                if (error.response) {
+                    const resp = {
+                        href: href,
+                        text: text,
+                        file: file,
+                        status: error.response.status,
+                    };
+                    return resp
+                };
+            });
+        fileArray.push(validateS);
+    });
+    return fileArray;
+}
+
+module.exports = { readFile, validate };
