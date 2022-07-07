@@ -1,10 +1,19 @@
+const { readFile, validate } = require('./md-links')
 const path = require('path')
-const filePath = './README.md';
+
+const filePath = './dummy/README.md';
 
 const mdLinks = (filePath, options) => {
-  if (path.isAbsolute(filePath) == false)
-  console.log('no es ruta absoluta')
-  const absolutPath = path.join(__dirname, filePath)
-  console.log('ahora si lo es' + absolutPath)
+  const pro = new Promise ((resolve, reject) => {
+
+    if (path.isAbsolute(filePath) == false){
+
+      const absolutPath = path.join(__dirname, filePath)
+      // readFile(absolutPath)
+      console.log(validate(absolutPath))
+    } else {
+      console.log(`Si es ruta absoluta ${filePath}`)
+      console.log(readFile(filePath))
+    }
+  })
 }
-mdLinks(filePath)
