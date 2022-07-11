@@ -4,7 +4,7 @@ const path = require('path')
 const filePath = './dummy/README.md';
 
 const mdLinks = (filePath, options) => {
-  const pro = new Promise ((resolve, reject) => {
+  return new Promise ((resolve, reject) => {
 
     if (path.isAbsolute(filePath) == false){
 
