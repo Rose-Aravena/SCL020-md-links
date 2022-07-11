@@ -58,7 +58,6 @@ const validate = (absolutPath) => {
                     status: response.status,
                     statusText: response.statusText
                 };
-                // console.log(resp)
                 return resp
             })
             .catch((error) => {
@@ -68,15 +67,16 @@ const validate = (absolutPath) => {
                         text: text,
                         file: file,
                         status: error.response.status,
+                        statusText: 'Fail'
                     };
                     return resp
                 };
             });
-            validateLinks.then(resp => fileArray.push(resp))
-            fileArray.push(validateLinks)
+        fileArray.push(validateLinks)
     });
-    resolve(fileArray)
-})
+    return Promise.all(fileArray)
 }
+validate(absolutPath).then(console.log)
+
 
 module.exports = { readFile, validate };
