@@ -5,16 +5,23 @@ const path = require('path')
 const marked = require('marked');
 const cheerio = require('cheerio');
 
-// const files = fs.readdirSync('./') // Reads the contents of the directory. Returns: <string[]>
-// console.log(files)
-
 const filePath = './dummy/README.md'; // ruta relativa
+// const files = fs.readdirSync('./') // Reads the contents of the directory
+// console.log(files)
+const existencePath = (filePath) => (fs.existsSync(filePath)); // ruta existe?
+console.log(existencePath(filePath))
 
-// const absolutPath = path.join(__dirname, filePath) // ruta absoluta
+const extension = (filePath) => (path.extname(filePath) === '.md'); // verificar extension
+console.log(extension(filePath))
 
-const readFile = (filePath) => {
-    const prom = new Promise((resolve) => {
-        const read = fs.readFileSync(filePath, 'utf8')
+const isFile = (filePath) => fs.statSync(filePath).isDirectory() // es un directorio?
+console.log(isFile(filePath))
+
+const absolutPath = path.join(__dirname, filePath) // ruta absoluta
+
+const readFile = (absolutPath) => {
+    // return new Promise((resolve) => {
+        const read = fs.readFileSync(absolutPath, 'utf8')
         const fileHtml = marked.parse(read)
         const $ = cheerio.load(fileHtml)
         const getLinks = $('a') // indicamos lo que queremos extraer del html
@@ -24,40 +31,40 @@ const readFile = (filePath) => {
             arrayLinks.push({
                 href: $(links).attr('href'),
                 text: $(links).text(),
-                file: filePath
+                file: absolutPath
             })
         })
-        resolve(arrayLinks)
-    })
-    prom
-        .then()
+        return arrayLinks;
+    //     resolve(arrayLinks)
+    // })
 }
-console.log(readFile(filePath))
 
-const validate = (filePath) => {
-    const fileRead = readFile(filePath)
+const validate = (absolutPath) => {
+    const fileRead = readFile(absolutPath)
     let fileArray = []
 
     fileRead.map((links) => {
-        const href = links.href;
+        const url = links.href;
         const text = links.text;
-        const file = links.file
+        const file = links.file;
 
-        const validateS = axios.get(href)
+        const validateLinks = axios.get(url)
             .then((response) => {
                 const resp = {
-                    href: href,
+                    href: url,
                     text: text,
                     file: file,
                     status: response.status,
                     statusText: response.statusText
                 };
+                // console.log(resp)
+                fileArray.push(resp)
                 return resp
             })
             .catch((error) => {
                 if (error.response) {
                     const resp = {
-                        href: href,
+                        href: url,
                         text: text,
                         file: file,
                         status: error.response.status,
@@ -65,9 +72,10 @@ const validate = (filePath) => {
                     return resp
                 };
             });
-        fileArray.push(validateS);
+            validateLinks.then(resp => fileArray.push(resp))
     });
     return fileArray;
 }
+console.log(validate(absolutPath))
 
 module.exports = { readFile, validate };
