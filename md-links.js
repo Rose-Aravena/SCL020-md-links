@@ -6,16 +6,16 @@ const marked = require('marked');
 const cheerio = require('cheerio');
 
 const filePath = './dummy/README.md'; // ruta relativa
-// const files = fs.readdirSync('./') // Reads the contents of the directory
+const files = fs.readdirSync('./') // Reads the contents of the directory
 // console.log(files)
 const existencePath = (filePath) => (fs.existsSync(filePath)); // ruta existe?
-console.log(existencePath(filePath))
+// console.log(existencePath(filePath))
 
 const extension = (filePath) => (path.extname(filePath) === '.md'); // verificar extension
-console.log(extension(filePath))
+// console.log(extension(filePath))
 
 const isFile = (filePath) => fs.statSync(filePath).isDirectory() // es un directorio?
-console.log(isFile(filePath))
+// console.log(isFile(filePath))
 
 const absolutPath = path.join(__dirname, filePath) // ruta absoluta
 
@@ -40,6 +40,7 @@ const readFile = (absolutPath) => {
 }
 
 const validate = (absolutPath) => {
+    return new Promise((resolve) => {
     const fileRead = readFile(absolutPath)
     let fileArray = []
 
@@ -58,7 +59,6 @@ const validate = (absolutPath) => {
                     statusText: response.statusText
                 };
                 // console.log(resp)
-                fileArray.push(resp)
                 return resp
             })
             .catch((error) => {
@@ -73,9 +73,10 @@ const validate = (absolutPath) => {
                 };
             });
             validateLinks.then(resp => fileArray.push(resp))
+            fileArray.push(validateLinks)
     });
-    return fileArray;
+    resolve(fileArray)
+})
 }
-console.log(validate(absolutPath))
 
 module.exports = { readFile, validate };
