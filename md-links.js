@@ -8,13 +8,16 @@ const cheerio = require('cheerio');
 const filePath = './dummy/README.md'; // ruta relativa
 const files = fs.readdirSync('./') // Reads the contents of the directory
 // console.log(files)
-const existencePath = (filePath) => (fs.existsSync(filePath)); // ruta existe?
+const existencePath = (filePath) => fs.existsSync(filePath); // ruta existe?
 // console.log(existencePath(filePath))
 
-const extension = (filePath) => (path.extname(filePath) === '.md'); // verificar extension
-// console.log(extension(filePath))
+const isAbsolutePath = (filePath) => path.isAbsolute(filePath); // es ruta absoluta
+const notAbsolutePath = (filePath) => path.resolve(filePath); // pasar a ruta absoluta
 
-const isFile = (filePath) => fs.statSync(filePath).isDirectory() // es un directorio?
+const extension = (filePath) => (path.extname(filePath) === '.md'); // verificar extension
+console.log(extension(filePath))
+
+const isFolder = (filePath) => fs.statSync(filePath).isDirectory() // es un directorio?
 // console.log(isFile(filePath))
 
 const absolutPath = path.join(__dirname, filePath) // ruta absoluta
@@ -24,7 +27,7 @@ const readFile = (absolutPath) => {
         const read = fs.readFileSync(absolutPath, 'utf8')
         const fileHtml = marked.parse(read)
         const $ = cheerio.load(fileHtml)
-        const getLinks = $('a') // indicamos lo que queremos extraer del html
+        const getLinks = $('a') 
 
         let arrayLinks = []
         getLinks.each((i, links) => {
@@ -75,7 +78,7 @@ const validate = (absolutPath) => {
     });
     return Promise.all(fileArray)
 }
-validate(absolutPath).then(console.log)
+// validate(absolutPath).then(console.log)
 
 
-module.exports = { readFile, validate };
+module.exports = { readFile, validate, isAbsolutePath, notAbsolutePath, existencePath, extension };
