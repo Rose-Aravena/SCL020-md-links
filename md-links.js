@@ -6,7 +6,7 @@ const marked = require('marked');
 const cheerio = require('cheerio');
 
 const filePath = './dummy/README.md'; // ruta relativa
-// const files = fs.readdirSync('./') // Reads the contents of the directory
+const files = fs.readdirSync('./') // Reads the contents of the directory
 // console.log(files)
 const existencePath = (filePath) => (fs.existsSync(filePath)); // ruta existe?
 // console.log(existencePath(filePath))
@@ -40,6 +40,7 @@ const readFile = (absolutPath) => {
 }
 
 const validate = (absolutPath) => {
+    return new Promise((resolve) => {
     const fileRead = readFile(absolutPath)
     let fileArray = []
 
@@ -76,5 +77,6 @@ const validate = (absolutPath) => {
     return Promise.all(fileArray)
 }
 validate(absolutPath).then(console.log)
+
 
 module.exports = { readFile, validate };
