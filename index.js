@@ -6,7 +6,7 @@ const filePath = './dummy/README.md';
 const mdLinks = (filePath, options) => {
   return new Promise ((resolve, reject) => {
 
-    if (path.isAbsolute(filePath) == false){
+    if (!fs.existsSync(filePath)){
 
       const absolutPath = path.join(__dirname, filePath)
       // readFile(absolutPath)
