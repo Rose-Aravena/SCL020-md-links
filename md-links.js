@@ -40,7 +40,6 @@ const readFile = (absolutPath) => {
 }
 
 const validate = (absolutPath) => {
-    return new Promise((resolve) => {
     const fileRead = readFile(absolutPath)
     let fileArray = []
 
