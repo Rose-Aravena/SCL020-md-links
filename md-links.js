@@ -6,19 +6,16 @@ const marked = require('marked');
 const cheerio = require('cheerio');
 
 const filePath = './dummy/README.md'; // ruta relativa
-const files = fs.readdirSync('./') // Reads the contents of the directory
-// console.log(files)
-const existencePath = (filePath) => fs.existsSync(filePath); // ruta existe?
+// ruta existe?
+const existencePath = (filePath) => fs.existsSync(filePath); 
 // console.log(existencePath(filePath))
-
-const isAbsolutePath = (filePath) => path.isAbsolute(filePath); // es ruta absoluta
-const notAbsolutePath = (filePath) => path.resolve(filePath); // pasar a ruta absoluta
-
-const extension = (filePath) => (path.extname(filePath) === '.md'); // verificar extension
-console.log(extension(filePath))
-
-const isFolder = (filePath) => fs.statSync(filePath).isDirectory() // es un directorio?
-// console.log(isFile(filePath))
+// es ruta absoluta
+const isAbsolutePath = (filePath) => path.isAbsolute(filePath);
+ // pasar a ruta absoluta
+const notAbsolutePath = (filePath) => path.resolve(filePath);
+ // verificar extension
+const extension = (filePath) => (path.extname(filePath) === '.md');
+// console.log(extension(filePath))
 
 const absolutPath = path.join(__dirname, filePath) // ruta absoluta
 
@@ -41,22 +38,19 @@ const readFile = (absolutPath) => {
     //     resolve(arrayLinks)
     // })
 }
+// console.log(readFile(absolutPath))
 
 const validate = (absolutPath) => {
     const fileRead = readFile(absolutPath)
     let fileArray = []
 
     fileRead.map((links) => {
-        const url = links.href;
-        const text = links.text;
-        const file = links.file;
-
-        const validateLinks = axios.get(url)
+        const validateLinks = axios.get(links.href)
             .then((response) => {
                 const resp = {
-                    href: url,
-                    text: text,
-                    file: file,
+                    href: links.href,
+                    text: links.text,
+                    file: links.file,
                     status: response.status,
                     statusText: response.statusText
                 };
@@ -65,9 +59,9 @@ const validate = (absolutPath) => {
             .catch((error) => {
                 if (error.response) {
                     const resp = {
-                        href: url,
-                        text: text,
-                        file: file,
+                        href: links.href,
+                        text: links.text,
+                        file: links.file,
                         status: error.response.status,
                         statusText: 'Fail'
                     };
@@ -80,5 +74,20 @@ const validate = (absolutPath) => {
 }
 // validate(absolutPath).then(console.log)
 
+const getAllFiles = (filePath, arrayOfFiles) => {
+    const files = fs.readdirSync(filePath)
+    arrayOfFiles = arrayOfFiles || []
 
-module.exports = { readFile, validate, isAbsolutePath, notAbsolutePath, existencePath, extension };
+    files.forEach((file) => {
+        if (fs.statSync(filePath + "/" + file).isDirectory()) {
+        arrayOfFiles = getAllFiles(filePath + "/" + file, arrayOfFiles)
+        } else if (path.extname(file)==='.md'){
+            const filemd = path.join(__dirname, file)
+            arrayOfFiles.push({filemd})
+        } 
+    })
+    return arrayOfFiles
+}
+// console.log(getAllFiles(filePath))
+
+module.exports = { readFile, validate, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles };
