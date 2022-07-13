@@ -5,7 +5,7 @@ const path = require('path')
 const marked = require('marked');
 const cheerio = require('cheerio');
 
-const filePath = './dummy/README.md'; // ruta relativa
+const filePath = './dummy/'; // ruta relativa
 // ruta existe?
 const existencePath = (filePath) => fs.existsSync(filePath); 
 // console.log(existencePath(filePath))
@@ -17,7 +17,7 @@ const notAbsolutePath = (filePath) => path.resolve(filePath);
 const extension = (filePath) => (path.extname(filePath) === '.md');
 // console.log(extension(filePath))
 
-const absolutPath = path.join(__dirname, filePath) // ruta absoluta
+const absolutPath = notAbsolutePath(filePath) // ruta absoluta
 
 const readFile = (absolutPath) => {
     // return new Promise((resolve) => {
@@ -40,7 +40,7 @@ const readFile = (absolutPath) => {
 }
 // console.log(readFile(absolutPath))
 
-const validate = (absolutPath) => {
+const validateLinks = (absolutPath) => {
     const fileRead = readFile(absolutPath)
     let fileArray = []
 
@@ -74,7 +74,7 @@ const validate = (absolutPath) => {
 }
 // validate(absolutPath).then(console.log)
 
-const getAllFiles = (filePath, arrayOfFiles) => {
+const getAllFiles = (absolutPath, arrayOfFiles) => {
     const files = fs.readdirSync(filePath)
     arrayOfFiles = arrayOfFiles || []
 
@@ -82,12 +82,12 @@ const getAllFiles = (filePath, arrayOfFiles) => {
         if (fs.statSync(filePath + "/" + file).isDirectory()) {
         arrayOfFiles = getAllFiles(filePath + "/" + file, arrayOfFiles)
         } else if (path.extname(file)==='.md'){
-            const filemd = path.join(__dirname, file)
+            const filemd = path.join(__dirname, filePath, "/", file)
             arrayOfFiles.push({filemd})
         } 
     })
     return arrayOfFiles
 }
-// console.log(getAllFiles(filePath))
+// console.log(getAllFiles(absolutPath))
 
-module.exports = { readFile, validate, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles };
+module.exports = { readFile, validateLinks, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles };
