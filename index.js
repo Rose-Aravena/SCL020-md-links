@@ -7,7 +7,6 @@ const filePath = './dummy/';
 
 const mdLinks = (filePath, options) => {
   return new Promise ((resolve, reject) => {
-    let resp = []
     // pasar a ruta absoluta 
     const absolutePath = !isAbsolutePath(filePath) ? notAbsolutePath(filePath) : filePath;
     // la ruta existe? true o false
@@ -23,28 +22,36 @@ const mdLinks = (filePath, options) => {
         if(getFile.length === 0){
           console.log(chalk.red('Archivo ".md" no encontrado, comprueba la ruta del archivo: ')+chalk.yellow(absolutePath))
         }else{
-          getFile.map((file) => {
+          const arrayPromises = getFile.map((file) => {
             const filemd = file.filemd
             console.log(chalk.greenBright('Archivo encontrado, ruta definida: ')+chalk.yellow(filemd))
-            mdLinks(filemd)
+            return mdLinks(filemd, options)
           })
+          resolve(Promise.all(arrayPromises))
         }
       }
-      // else if (options.validate === 'true') {
-      //   console.log('opstions validate')
-      // }
+      if (options.validate) {
+        console.log(chalk.blueBright('Validando los links....'))
+        const valida = validateLinks(absolutePath)
+        resolve(valida)
+      }
       else{
         const read = readFile(absolutePath)
-        console.log(read)
-        // return Promise.all(read)
-        // read.map((file) => {
-        //   resp.push(file)
-        // })
+        console.log(chalk.blueBright('Imprimiendo informacion de links....'))
+        resolve(read)
       }
     } else {
       console.log(chalk.red('La ruta ingresada no es valida: ')+ chalk.yellow(absolutePath))
-    } 
-    // resolve(resp)
+      reject('La ruta ingresada no es valida: ') 
+    }
   })
 }
-mdLinks(filePath)
+// mdLinks(filePath).then((result) => {
+//   console.log(result, 'aca esta el resultado')
+// }).catch( (error) => {
+//   console.log(error)
+// })
+
+module.exports = {
+  mdLinks,
+};
