@@ -4,13 +4,14 @@ const process = require('process');
 const { mdLinks } = require('./index')
 
 const cli = () =>{
+    let path = process.argv[2];
     let options = {
         validate: false
     }
     if(process.argv[3]=== '--validate'){
         options.validate = true
     }
-    mdLinks(process.argv[2], options).then((resp) => {
+    mdLinks(path, options).then((resp) => {
         console.log(resp);
     });
 }
