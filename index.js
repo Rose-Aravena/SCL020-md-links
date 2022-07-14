@@ -3,19 +3,15 @@ const path = require('path');
 const chalk = require('chalk');
 const { readFile, validateLinks, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles } = require('./md-links')
 
-const filePath = './dummy/';
-
 const mdLinks = (filePath, options) => {
-  return new Promise ((resolve, reject) => {
-    // pasar a ruta absoluta 
+  return new Promise ((resolve) => {
     const absolutePath = !isAbsolutePath(filePath) ? notAbsolutePath(filePath) : filePath;
-    // la ruta existe? true o false
     const validatePath = existencePath(absolutePath)
 
-    if (validatePath){ // si la ruta existe
+    if (validatePath){
       console.log(chalk.greenBright('La ruta si existe'))
-      const extensionMD = extension(absolutePath) // es un archivo .md? true o false
-      if(!extensionMD){ // si no es archivo .md
+      const extensionMD = extension(absolutePath)
+      if(!extensionMD){
         console.log(chalk.cyan('La ruta es un directorio ') + chalk.yellow(fs.readdirSync(absolutePath)))
         console.log(chalk.blueBright('buscando archivo con extension ".md"....'))
         const getFile = getAllFiles(absolutePath)
@@ -36,21 +32,15 @@ const mdLinks = (filePath, options) => {
         resolve(valida)
       }
       else{
-        const read = readFile(absolutePath)
         console.log(chalk.blueBright('Imprimiendo informacion de links....'))
+        const read = readFile(absolutePath)
         resolve(read)
       }
     } else {
       console.log(chalk.red('La ruta ingresada no es valida: ')+ chalk.yellow(absolutePath))
-      reject('La ruta ingresada no es valida: ') 
     }
   })
 }
-// mdLinks(filePath).then((result) => {
-//   console.log(result, 'aca esta el resultado')
-// }).catch( (error) => {
-//   console.log(error)
-// })
 
 module.exports = {
   mdLinks,

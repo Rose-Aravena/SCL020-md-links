@@ -1,26 +1,20 @@
 const axios = require('axios').default;
-const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path')
 const marked = require('marked');
 const cheerio = require('cheerio');
 
-const filePath = './dummy/'; // ruta relativa
-// ruta existe?
-const existencePath = (filePath) => fs.existsSync(filePath); 
-// console.log(existencePath(filePath))
-// es ruta absoluta
-const isAbsolutePath = (filePath) => path.isAbsolute(filePath);
- // pasar a ruta absoluta
-const notAbsolutePath = (filePath) => path.resolve(filePath);
- // verificar extension
-const extension = (filePath) => (path.extname(filePath) === '.md');
-// console.log(extension(filePath))
 
-const absolutPath = notAbsolutePath(filePath) // ruta absoluta
+
+const existencePath = (filePath) => fs.existsSync(filePath); 
+
+const isAbsolutePath = (filePath) => path.isAbsolute(filePath);
+
+const notAbsolutePath = (filePath) => path.resolve(filePath);
+
+const extension = (filePath) => (path.extname(filePath) === '.md');
 
 const readFile = (absolutPath) => {
-    // return new Promise((resolve) => {
         const read = fs.readFileSync(absolutPath, 'utf8')
         const fileHtml = marked.parse(read)
         const $ = cheerio.load(fileHtml)
@@ -35,10 +29,7 @@ const readFile = (absolutPath) => {
             })
         })
         return arrayLinks;
-    //     resolve(arrayLinks)
-    // })
 }
-// console.log(readFile(absolutPath))
 
 const validateLinks = (absolutPath) => {
     const fileRead = readFile(absolutPath)
@@ -72,7 +63,6 @@ const validateLinks = (absolutPath) => {
     });
     return Promise.all(fileArray)
 }
-// validate(absolutPath).then(console.log)
 
 const getAllFiles = (absolutPath, arrayOfFiles) => {
     const files = fs.readdirSync(filePath)
@@ -88,6 +78,5 @@ const getAllFiles = (absolutPath, arrayOfFiles) => {
     })
     return arrayOfFiles
 }
-// console.log(getAllFiles(absolutPath))
 
 module.exports = { readFile, validateLinks, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles };
