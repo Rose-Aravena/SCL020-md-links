@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { readFile, validateLinks, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles } = require('./md-links')
+const { readFile, validateLinks, statsLinks, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles, stats } = require('./md-links')
 
 const mdLinks = (filePath, options) => {
   return new Promise ((resolve) => {
@@ -25,13 +25,14 @@ const mdLinks = (filePath, options) => {
           })
           resolve(Promise.all(arrayPromises))
         }
-      }
-      if (options.validate) {
+      }else if (options.validate) {
         console.log(chalk.blueBright('Validando los links....'))
         const valida = validateLinks(absolutePath)
         resolve(valida)
-      }
-      else{
+      }else if (options.stats) {
+        const stats = statsLinks(absolutePath)
+        resolve(stats)
+      }else{
         console.log(chalk.blueBright('Imprimiendo informacion de links....'))
         const read = readFile(absolutePath)
         resolve(read)

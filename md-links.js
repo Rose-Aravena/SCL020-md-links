@@ -4,8 +4,6 @@ const path = require('path')
 const marked = require('marked');
 const cheerio = require('cheerio');
 
-
-
 const existencePath = (filePath) => fs.existsSync(filePath); 
 
 const isAbsolutePath = (filePath) => path.isAbsolute(filePath);
@@ -14,8 +12,23 @@ const notAbsolutePath = (filePath) => path.resolve(filePath);
 
 const extension = (filePath) => (path.extname(filePath) === '.md');
 
-const readFile = (absolutPath) => {
-        const read = fs.readFileSync(absolutPath, 'utf8')
+const getAllFiles = (filePath, arrayOfFiles) => {
+    const files = fs.readdirSync(filePath)
+    arrayOfFiles = arrayOfFiles || []
+
+    files.forEach((file) => {
+        if (fs.statSync(filePath + "/" + file).isDirectory()) {
+        arrayOfFiles = getAllFiles(filePath + "/" + file, arrayOfFiles)
+        } else if (path.extname(file)==='.md'){
+            const filemd = path.join(filePath, "/", file)
+            arrayOfFiles.push({filemd})
+        } 
+    })
+    return arrayOfFiles
+}
+
+const readFile = (absolutePath) => {
+        const read = fs.readFileSync(absolutePath, 'utf8')
         const fileHtml = marked.parse(read)
         const $ = cheerio.load(fileHtml)
         const getLinks = $('a') 
@@ -25,14 +38,14 @@ const readFile = (absolutPath) => {
             arrayLinks.push({
                 href: $(links).attr('href'),
                 text: $(links).text(),
-                file: absolutPath
+                file: absolutePath
             })
         })
         return arrayLinks;
 }
 
-const validateLinks = (absolutPath) => {
-    const fileRead = readFile(absolutPath)
+const validateLinks = (absolutePath) => {
+    const fileRead = readFile(absolutePath)
     let fileArray = []
 
     fileRead.map((links) => {
@@ -64,19 +77,24 @@ const validateLinks = (absolutPath) => {
     return Promise.all(fileArray)
 }
 
-const getAllFiles = (absolutPath, arrayOfFiles) => {
-    const files = fs.readdirSync(filePath)
-    arrayOfFiles = arrayOfFiles || []
-
-    files.forEach((file) => {
-        if (fs.statSync(filePath + "/" + file).isDirectory()) {
-        arrayOfFiles = getAllFiles(filePath + "/" + file, arrayOfFiles)
-        } else if (path.extname(file)==='.md'){
-            const filemd = path.join(__dirname, filePath, "/", file)
-            arrayOfFiles.push({filemd})
-        } 
+const statsLinks = (absolutePath) => {
+    const result = validateLinks(absolutePath).then(data => {
+        let url = []
+        let resp = {
+            total: data.length,
+            ok: 0,
+            broken: 0,
+        }
+        data.map((links) => {
+            if(links.statusText === 'OK'){
+                resp.ok+=1
+            }else if(links.statusText === 'Fail'){
+                resp.broken+=1
+            }
+        })
+        return resp
     })
-    return arrayOfFiles
+    return result
 }
 
-module.exports = { readFile, validateLinks, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles };
+module.exports = { readFile, validateLinks, statsLinks, isAbsolutePath, notAbsolutePath, existencePath, extension, getAllFiles };
